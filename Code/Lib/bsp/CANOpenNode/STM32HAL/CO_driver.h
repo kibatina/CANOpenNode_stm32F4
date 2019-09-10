@@ -271,8 +271,10 @@ typedef struct{
  */
 typedef struct{
 	CAN_HandleTypeDef   *CANbaseAddress; /**< From CO_CANmodule_init() */
+		// message array.
     CO_CANrx_t          *rxArray;        /**< From CO_CANmodule_init() */
     uint16_t             rxSize;         /**< From CO_CANmodule_init() */
+		// message array.
     CO_CANtx_t          *txArray;        /**< From CO_CANmodule_init() */
     uint16_t             txSize;         /**< From CO_CANmodule_init() */
     volatile bool_t      CANnormal;      /**< CAN module is in normal mode */

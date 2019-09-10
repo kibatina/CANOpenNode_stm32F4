@@ -113,6 +113,7 @@
     #define CO_RXCAN_SDO_CLI  (CO_RXCAN_SDO_SRV+CO_NO_SDO_SERVER)     /*  start index for SDO client message (response) */
     #define CO_RXCAN_CONS_HB  (CO_RXCAN_SDO_CLI+CO_NO_SDO_CLIENT)     /*  start index for Heartbeat Consumer messages */
     /* total number of received CAN messages */
+		// =1+1+4+1+1+4=12
     #define CO_RXCAN_NO_MSGS (1+CO_NO_SYNC+CO_NO_RPDO+CO_NO_SDO_SERVER+CO_NO_SDO_CLIENT+CO_NO_HB_CONS)
 
     #define CO_TXCAN_NMT       0                                      /*  index for NMT master message */
@@ -123,6 +124,7 @@
     #define CO_TXCAN_SDO_CLI  (CO_TXCAN_SDO_SRV+CO_NO_SDO_SERVER)     /*  start index for SDO client message (request) */
     #define CO_TXCAN_HB       (CO_TXCAN_SDO_CLI+CO_NO_SDO_CLIENT)     /*  index for Heartbeat message */
     /* total number of transmitted CAN messages */
+		// =1+1+1+4+1+1+1=10.
     #define CO_TXCAN_NO_MSGS (CO_NO_NMT_MASTER+CO_NO_SYNC+CO_NO_EMERGENCY+CO_NO_TPDO+CO_NO_SDO_SERVER+CO_NO_SDO_CLIENT+1)
 
 
@@ -192,22 +194,13 @@
 
 
 /******************************************************************************/
-CO_ReturnError_t CO_init(
-        int32_t                 CANbaseAddress,
-        uint8_t                 nodeId,
-        uint16_t                bitRate)
+CO_ReturnError_t CO_init(   int32_t CANbaseAddress, uint8_t nodeId, uint16_t bitRate)
 {
-
     int16_t i;
     CO_ReturnError_t err;
-#ifndef CO_USE_GLOBALS
     uint16_t errCnt;
-#endif
-#if CO_NO_TRACE > 0
-    uint32_t CO_traceBufferSize[CO_NO_TRACE];
-#endif
-
     /* Verify parameters from CO_OD */
+		// 相当于assert功能。
     if(   sizeof(OD_TPDOCommunicationParameter_t) != sizeof(CO_TPDOCommPar_t)
        || sizeof(OD_TPDOMappingParameter_t) != sizeof(CO_TPDOMapPar_t)
        || sizeof(OD_RPDOCommunicationParameter_t) != sizeof(CO_RPDOCommPar_t)
@@ -215,7 +208,7 @@ CO_ReturnError_t CO_init(
     {
         return CO_ERROR_PARAMETERS;
     }
-
+		// 不理解这个做什么用。
     #if CO_NO_SDO_CLIENT == 1
     if(sizeof(OD_SDOClientParameter_t) != sizeof(CO_SDOclientPar_t)){
         return CO_ERROR_PARAMETERS;

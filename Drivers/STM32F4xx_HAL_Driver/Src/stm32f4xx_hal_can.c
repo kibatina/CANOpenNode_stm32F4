@@ -1334,7 +1334,7 @@ void HAL_CAN_IRQHandler(CAN_HandleTypeDef *hcan)
   {
     /* Transmit Mailbox 0 management *****************************************/
     if ((tsrflags & CAN_TSR_RQCP0) != RESET)
-    {
+    {// RQCP= request complete.
       /* Clear the Transmission Complete flag (and TXOK0,ALST0,TERR0 bits) */
       __HAL_CAN_CLEAR_FLAG(hcan, CAN_FLAG_RQCP0);
 

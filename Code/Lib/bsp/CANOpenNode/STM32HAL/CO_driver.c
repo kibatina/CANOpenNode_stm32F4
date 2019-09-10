@@ -423,6 +423,7 @@ CO_ReturnError_t CO_CANsend(CO_CANmodule_t *CANmodule, CO_CANtx_t *buffer)
 
     uint32_t TxMailboxNum;
     /* if CAN TX buffer is free, send message */
+		// 这个应该用不到，当存在操作系统的时候需要使用。
     CO_LOCK_CAN_SEND();
 
     prepareTxHeader(&TxHeader, buffer);
