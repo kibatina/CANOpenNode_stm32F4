@@ -73,15 +73,7 @@
     static CO_CANtx_t          *CO_CANmodule_txArray0;
     static CO_OD_extension_t   *CO_SDO_ODExtensions;
     static CO_HBconsNode_t     *CO_HBcons_monitoredNodes;
-#if CO_NO_TRACE > 0
-    static uint32_t            *CO_traceTimeBuffers[CO_NO_TRACE];
-    static int32_t             *CO_traceValueBuffers[CO_NO_TRACE];
-  #ifdef CO_USE_GLOBALS
-  #ifndef CO_TRACE_BUFFER_SIZE_FIXED
-    #define CO_TRACE_BUFFER_SIZE_FIXED 100
-  #endif
-  #endif
-#endif
+
 
 
 /* Verify features from CO_OD *************************************************/
@@ -145,11 +137,6 @@
 #if CO_NO_SDO_CLIENT == 1
     static CO_SDOclient_t       COO_SDOclient;
 #endif
-#if CO_NO_TRACE > 0
-    static CO_trace_t           COO_trace[CO_NO_TRACE];
-    static uint32_t             COO_traceTimeBuffers[CO_NO_TRACE][CO_TRACE_BUFFER_SIZE_FIXED];
-    static int32_t              COO_traceValueBuffers[CO_NO_TRACE][CO_TRACE_BUFFER_SIZE_FIXED];
-#endif
 #endif
 
 
@@ -194,6 +181,7 @@
 
 
 /******************************************************************************/
+// TODO,CANbaseAddress的类型没变哟是int32_t吧，这样转来转去没意义啊。
 CO_ReturnError_t CO_init(   int32_t CANbaseAddress, uint8_t nodeId, uint16_t bitRate)
 {
     int16_t i;
@@ -217,7 +205,7 @@ CO_ReturnError_t CO_init(   int32_t CANbaseAddress, uint8_t nodeId, uint16_t bit
 
 
     /* Initialize CANopen object */
-#ifdef CO_USE_GLOBALS
+
     CO = &COO;
 
     CO->CANmodule[0]                    = &COO_CANmodule;
@@ -239,111 +227,14 @@ CO_ReturnError_t CO_init(   int32_t CANbaseAddress, uint8_t nodeId, uint16_t bit
   #if CO_NO_SDO_CLIENT == 1
     CO->SDOclient                       = &COO_SDOclient;
   #endif
-  #if CO_NO_TRACE > 0
-    for(i=0; i<CO_NO_TRACE; i++) {
-        CO->trace[i]                    = &COO_trace[i];
-        CO_traceTimeBuffers[i]          = &COO_traceTimeBuffers[i][0];
-        CO_traceValueBuffers[i]         = &COO_traceValueBuffers[i][0];
-        CO_traceBufferSize[i]           = CO_TRACE_BUFFER_SIZE_FIXED;
-    }
-  #endif
-#else
-    if(CO == NULL){    /* Use malloc only once */
-        CO = &COO;
-        CO->CANmodule[0]                    = (CO_CANmodule_t *)    calloc(1, sizeof(CO_CANmodule_t));
-        CO_CANmodule_rxArray0               = (CO_CANrx_t *)        calloc(CO_RXCAN_NO_MSGS, sizeof(CO_CANrx_t));
-        CO_CANmodule_txArray0               = (CO_CANtx_t *)        calloc(CO_TXCAN_NO_MSGS, sizeof(CO_CANtx_t));
-        for(i=0; i<CO_NO_SDO_SERVER; i++){
-            CO->SDO[i]                      = (CO_SDO_t *)          calloc(1, sizeof(CO_SDO_t));
-        }
-        CO_SDO_ODExtensions                 = (CO_OD_extension_t*)  calloc(CO_OD_NoOfElements, sizeof(CO_OD_extension_t));
-        CO->em                              = (CO_EM_t *)           calloc(1, sizeof(CO_EM_t));
-        CO->emPr                            = (CO_EMpr_t *)         calloc(1, sizeof(CO_EMpr_t));
-        CO->NMT                             = (CO_NMT_t *)          calloc(1, sizeof(CO_NMT_t));
-        CO->SYNC                            = (CO_SYNC_t *)         calloc(1, sizeof(CO_SYNC_t));
-        for(i=0; i<CO_NO_RPDO; i++){
-            CO->RPDO[i]                     = (CO_RPDO_t *)         calloc(1, sizeof(CO_RPDO_t));
-        }
-        for(i=0; i<CO_NO_TPDO; i++){
-            CO->TPDO[i]                     = (CO_TPDO_t *)         calloc(1, sizeof(CO_TPDO_t));
-        }
-        CO->HBcons                          = (CO_HBconsumer_t *)   calloc(1, sizeof(CO_HBconsumer_t));
-        CO_HBcons_monitoredNodes            = (CO_HBconsNode_t *)   calloc(CO_NO_HB_CONS, sizeof(CO_HBconsNode_t));
-      #if CO_NO_SDO_CLIENT == 1
-        CO->SDOclient                       = (CO_SDOclient_t *)    calloc(1, sizeof(CO_SDOclient_t));
-      #endif
-      #if CO_NO_TRACE > 0
-        for(i=0; i<CO_NO_TRACE; i++) {
-            CO->trace[i]                    = (CO_trace_t *)        calloc(1, sizeof(CO_trace_t));
-            CO_traceTimeBuffers[i]          = (uint32_t *)          calloc(OD_traceConfig[i].size, sizeof(uint32_t));
-            CO_traceValueBuffers[i]         = (int32_t *)           calloc(OD_traceConfig[i].size, sizeof(int32_t));
-            if(CO_traceTimeBuffers[i] != NULL && CO_traceValueBuffers[i] != NULL) {
-                CO_traceBufferSize[i] = OD_traceConfig[i].size;
-            } else {
-                CO_traceBufferSize[i] = 0;
-            }
-        }
-      #endif
-    }
 
-    CO_memoryUsed = sizeof(CO_CANmodule_t)
-                  + sizeof(CO_CANrx_t) * CO_RXCAN_NO_MSGS
-                  + sizeof(CO_CANtx_t) * CO_TXCAN_NO_MSGS
-                  + sizeof(CO_SDO_t) * CO_NO_SDO_SERVER
-                  + sizeof(CO_OD_extension_t) * CO_OD_NoOfElements
-                  + sizeof(CO_EM_t)
-                  + sizeof(CO_EMpr_t)
-                  + sizeof(CO_NMT_t)
-                  + sizeof(CO_SYNC_t)
-                  + sizeof(CO_RPDO_t) * CO_NO_RPDO
-                  + sizeof(CO_TPDO_t) * CO_NO_TPDO
-                  + sizeof(CO_HBconsumer_t)
-                  + sizeof(CO_HBconsNode_t) * CO_NO_HB_CONS
-  #if CO_NO_SDO_CLIENT == 1
-                  + sizeof(CO_SDOclient_t)
-  #endif
-                  + 0;
-  #if CO_NO_TRACE > 0
-    CO_memoryUsed += sizeof(CO_trace_t) * CO_NO_TRACE;
-    for(i=0; i<CO_NO_TRACE; i++) {
-        CO_memoryUsed += CO_traceBufferSize[i] * 8;
-    }
-  #endif
 
-    errCnt = 0;
-    if(CO->CANmodule[0]                 == NULL) errCnt++;
-    if(CO_CANmodule_rxArray0            == NULL) errCnt++;
-    if(CO_CANmodule_txArray0            == NULL) errCnt++;
-    for(i=0; i<CO_NO_SDO_SERVER; i++){
-        if(CO->SDO[i]                   == NULL) errCnt++;
-    }
-    if(CO_SDO_ODExtensions              == NULL) errCnt++;
-    if(CO->em                           == NULL) errCnt++;
-    if(CO->emPr                         == NULL) errCnt++;
-    if(CO->NMT                          == NULL) errCnt++;
-    if(CO->SYNC                         == NULL) errCnt++;
-    for(i=0; i<CO_NO_RPDO; i++){
-        if(CO->RPDO[i]                  == NULL) errCnt++;
-    }
-    for(i=0; i<CO_NO_TPDO; i++){
-        if(CO->TPDO[i]                  == NULL) errCnt++;
-    }
-    if(CO->HBcons                       == NULL) errCnt++;
-    if(CO_HBcons_monitoredNodes         == NULL) errCnt++;
-  #if CO_NO_SDO_CLIENT == 1
-    if(CO->SDOclient                    == NULL) errCnt++;
-  #endif
-  #if CO_NO_TRACE > 0
-    for(i=0; i<CO_NO_TRACE; i++) {
-        if(CO->trace[i]                 == NULL) errCnt++;
-    }
-  #endif
 
-    if(errCnt != 0) return CO_ERROR_OUT_OF_MEMORY;
-#endif
+
 
 
     CO->CANmodule[0]->CANnormal = false;
+	 	// TODO， 这个函数什么都不做。
     CO_CANsetConfigurationMode(CANbaseAddress);
 
     /* Verify CANopen Node-ID */
@@ -353,7 +244,7 @@ CO_ReturnError_t CO_init(   int32_t CANbaseAddress, uint8_t nodeId, uint16_t bit
         return CO_ERROR_PARAMETERS;
     }
 
-
+		// 初始化CANmodule，这里应该是设计到底层。
     err = CO_CANmodule_init(
             CO->CANmodule[0],
             (CAN_HandleTypeDef *)CANbaseAddress,
@@ -377,7 +268,7 @@ CO_ReturnError_t CO_init(   int32_t CANbaseAddress, uint8_t nodeId, uint16_t bit
             COB_IDClientToServer = OD_SDOServerParameter[i].COB_IDClientToServer;
             COB_IDServerToClient = OD_SDOServerParameter[i].COB_IDServerToClient;
         }
-
+				// 初始化SDO部分.
         err = CO_SDO_init(
                 CO->SDO[i],
                 COB_IDClientToServer,
@@ -396,7 +287,7 @@ CO_ReturnError_t CO_init(   int32_t CANbaseAddress, uint8_t nodeId, uint16_t bit
 
     if(err){CO_delete(CANbaseAddress); return err;}
 
-
+		// 初始化紧急管理部分。
     err = CO_EM_init(
             CO->em,
             CO->emPr,
@@ -412,7 +303,7 @@ CO_ReturnError_t CO_init(   int32_t CANbaseAddress, uint8_t nodeId, uint16_t bit
 
     if(err){CO_delete(CANbaseAddress); return err;}
 
-
+		// 初始化NMT部分
     err = CO_NMT_init(
             CO->NMT,
             CO->emPr,
@@ -554,22 +445,15 @@ CO_ReturnError_t CO_init(   int32_t CANbaseAddress, uint8_t nodeId, uint16_t bit
 
 
 /******************************************************************************/
-void CO_delete(int32_t CANbaseAddress){
-#ifndef CO_USE_GLOBALS
+void CO_delete(int32_t CANbaseAddress)
+{
     int16_t i;
-#endif
+
 
     CO_CANsetConfigurationMode(CANbaseAddress);
     CO_CANmodule_disable(CO->CANmodule[0]);
 
 #ifndef CO_USE_GLOBALS
-  #if CO_NO_TRACE > 0
-      for(i=0; i<CO_NO_TRACE; i++) {
-          free(CO->trace[i]);
-          free(CO_traceTimeBuffers[i]);
-          free(CO_traceValueBuffers[i]);
-      }
-  #endif
   #if CO_NO_SDO_CLIENT == 1
     free(CO->SDOclient);
   #endif

@@ -134,9 +134,7 @@ typedef struct{
 #if CO_NO_SDO_CLIENT == 1
     CO_SDOclient_t     *SDOclient;      /**< SDO client object */
 #endif
-#if CO_NO_TRACE > 0
-    CO_trace_t         *trace[CO_NO_TRACE]; /**< Trace object for monitoring variables */
-#endif
+
 }CO_t;
 
 

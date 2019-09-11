@@ -413,11 +413,13 @@ CO_ReturnError_t CO_CANsend(CO_CANmodule_t *CANmodule, CO_CANtx_t *buffer)
 	CO_ReturnError_t err = CO_ERROR_NO;
 
     /* Verify overflow */
-    if(buffer->bufferFull){
-        if(!CANmodule->firstCANtxMessage){
-            /* don't set error, if bootup message is still on buffers */
+    if(buffer->bufferFull)
+		{
+       if(!CANmodule->firstCANtxMessage)
+			 {
+           /* don't set error, if bootup message is still on buffers */
             CO_errorReport((CO_EM_t*)CANmodule->em, CO_EM_CAN_TX_OVERFLOW, CO_EMC_CAN_OVERRUN, buffer->ident);
-        }
+       }
         err = CO_ERROR_TX_OVERFLOW;
     }
 
@@ -590,7 +592,7 @@ void CO_CANinterrupt_Rx(const CO_CANmodule_t *CANmodule)
     uint32_t index;
     /* Search rxArray form CANmodule for the same CAN-ID. */
     for (index = 0; index < CANmodule->rxSize; index++)
-    	{
+    {
 			uint16_t msg = (((uint16_t)(CANmessage.RxHeader.StdId << 2)) | (uint16_t)(CANmessage.RxHeader.RTR));
 			if (((msg ^ MsgBuff->ident) & MsgBuff->mask) == 0)
 			{
@@ -598,7 +600,7 @@ void CO_CANinterrupt_Rx(const CO_CANmodule_t *CANmodule)
 				break;
 			}
 			MsgBuff++;
-   	    }
+    }
 
 	/* Call specific function, which will process the message */
 	if(msgMatched && (MsgBuff != NULL) && (MsgBuff->pFunct != NULL))
@@ -644,7 +646,7 @@ void CO_CANpolling_Tx(CO_CANmodule_t *CANmodule)
 {
 	if (HAL_CAN_GetTxMailboxesFreeLevel((CAN_HandleTypeDef*)CANmodule->CANbaseAddress) > 0)
 	{
-        /* First CAN message (bootup) was sent successfully */
+    /* First CAN message (bootup) was sent successfully */
 		CANmodule->firstCANtxMessage = false;
 		/* Clear flag from previous message */
 		CANmodule->bufferInhibitFlag = false;
