@@ -54,6 +54,7 @@ int main(void)
         
     /* Switch state */
     reset = CO_RESET_NOT;
+		// TODO， 这个timer1ms也是个谜，没看到改变或者被赋值的地方啊。
     timer1msPrevious = timer1ms;
     
     while (reset == CO_RESET_NOT) 

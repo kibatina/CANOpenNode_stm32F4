@@ -240,13 +240,13 @@ CO_ReturnError_t CO_init(   int32_t CANbaseAddress, uint8_t nodeId, uint16_t bit
     /* Verify CANopen Node-ID */
     if(nodeId<1 || nodeId>127)
     {
-        CO_delete(CANbaseAddress);
-        return CO_ERROR_PARAMETERS;
+      CO_delete(CANbaseAddress);
+      return CO_ERROR_PARAMETERS;
     }
 
 		// 初始化CANmodule，这里应该是设计到底层。
     err = CO_CANmodule_init(
-            CO->CANmodule[0],
+            CO->CANmodule[0],		//  这个数组就一个函数，对应一个物理的CAN接口。
             (CAN_HandleTypeDef *)CANbaseAddress,
             CO_CANmodule_rxArray0,
             CO_RXCAN_NO_MSGS,
@@ -260,13 +260,16 @@ CO_ReturnError_t CO_init(   int32_t CANbaseAddress, uint8_t nodeId, uint16_t bit
     {
         uint32_t COB_IDClientToServer;
         uint32_t COB_IDServerToClient;
-        if(i==0){
-            /*Default SDO server must be located at first index*/
-            COB_IDClientToServer = CO_CAN_ID_RSDO + nodeId;
-            COB_IDServerToClient = CO_CAN_ID_TSDO + nodeId;
-        }else{
-            COB_IDClientToServer = OD_SDOServerParameter[i].COB_IDClientToServer;
-            COB_IDServerToClient = OD_SDOServerParameter[i].COB_IDServerToClient;
+        if(i==0)
+				{
+          /*Default SDO server must be located at first index*/
+          COB_IDClientToServer = CO_CAN_ID_RSDO + nodeId;
+          COB_IDServerToClient = CO_CAN_ID_TSDO + nodeId;
+        }
+				else
+				{
+          COB_IDClientToServer = OD_SDOServerParameter[i].COB_IDClientToServer;
+          COB_IDServerToClient = OD_SDOServerParameter[i].COB_IDServerToClient;
         }
 				// 初始化SDO部分.
         err = CO_SDO_init(
@@ -417,27 +420,6 @@ CO_ReturnError_t CO_init(   int32_t CANbaseAddress, uint8_t nodeId, uint16_t bit
 #endif
 
 
-#if CO_NO_TRACE > 0
-    for(i=0; i<CO_NO_TRACE; i++) {
-        CO_trace_init(
-            CO->trace[i],
-            CO->SDO[0],
-            OD_traceConfig[i].axisNo,
-            CO_traceTimeBuffers[i],
-            CO_traceValueBuffers[i],
-            CO_traceBufferSize[i],
-            &OD_traceConfig[i].map,
-            &OD_traceConfig[i].format,
-            &OD_traceConfig[i].trigger,
-            &OD_traceConfig[i].threshold,
-            &OD_trace[i].value,
-            &OD_trace[i].min,
-            &OD_trace[i].max,
-            &OD_trace[i].triggerTime,
-            OD_INDEX_TRACE_CONFIG + i,
-            OD_INDEX_TRACE + i);
-    }
-#endif
 
 
     return CO_ERROR_NO;
@@ -496,31 +478,26 @@ CO_NMT_reset_cmd_t CO_process(
         NMTisPreOrOperational = true;
 
     ms50 += timeDifference_ms;
-    if(ms50 >= 50){
+    if(ms50 >= 50)
+		{
         ms50 -= 50;
         CO_NMT_blinkingProcess50ms(CO->NMT);
     }
-    if(timerNext_ms != NULL){
-        if(*timerNext_ms > 50){
+    if(timerNext_ms != NULL)
+		{
+        if(*timerNext_ms > 50)
+				{
             *timerNext_ms = 50;
         }
     }
 
 
-    for(i=0; i<CO_NO_SDO_SERVER; i++){
-        CO_SDO_process(
-                CO->SDO[i],
-                NMTisPreOrOperational,
-                timeDifference_ms,
-                1000,
-                timerNext_ms);
+    for(i=0; i<CO_NO_SDO_SERVER; i++)
+		{
+        CO_SDO_process(CO->SDO[i], NMTisPreOrOperational, timeDifference_ms, 1000, timerNext_ms);
     }
 
-    CO_EM_process(
-            CO->emPr,
-            NMTisPreOrOperational,
-            timeDifference_ms * 10,
-            OD_inhibitTimeEMCY);
+    CO_EM_process(CO->emPr, NMTisPreOrOperational, timeDifference_ms * 10, OD_inhibitTimeEMCY);
 
 
     reset = CO_NMT_process(

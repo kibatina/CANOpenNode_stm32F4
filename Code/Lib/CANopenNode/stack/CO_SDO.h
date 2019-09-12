@@ -633,6 +633,7 @@ typedef struct{
     /** Current internal state of the SDO server state machine #CO_SDO_state_t */
     CO_SDO_state_t      state;
     /** Toggle bit in segmented transfer or block sequence in block transfer */
+		// 等我修改为自己版本的时候就把这个bit的名字修改为togglebit。
     uint8_t             sequence;
     /** Timeout timer for SDO communication */
     uint16_t            timeoutTimer;
@@ -647,7 +648,7 @@ typedef struct{
     /** Indication end of block transfer */
     bool_t              endOfTransfer;
     /** Variable indicates, if new SDO message received from CAN bus */
-    bool_t              CANrxNew;
+    bool_t              CANrxNew;	// 收到message后开始置位，当该message被处理后被清零。
     /** From CO_SDO_initCallback() or NULL */
     void              (*pFunctSignal)(void);
     /** From CO_SDO_init() */

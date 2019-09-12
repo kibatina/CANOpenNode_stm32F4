@@ -176,7 +176,6 @@ CO_ReturnError_t CO_CANmodule_init(
         uint16_t                CANbitRate)
 {
     uint16_t i;
-
     /* verify arguments */
     if(CANmodule==NULL || rxArray==NULL || txArray==NULL)
     {
@@ -186,9 +185,8 @@ CO_ReturnError_t CO_CANmodule_init(
     {
     	;//do nothing
     }
-
+		//  RxFifo_Callback_CanModule_p 有什么用吗？TODO
     RxFifo_Callback_CanModule_p = CANmodule;
-
     /* Configure object variables */
     CANmodule->CANbaseAddress = (CAN_HandleTypeDef*)HALCanObject;
     CANmodule->rxArray = rxArray;
@@ -589,18 +587,20 @@ void CO_CANinterrupt_Rx(const CO_CANmodule_t *CANmodule)
 	CANmessage.DLC = (uint8_t)CANmessage.RxHeader.DLC;
 	CANmessage.ident = CANmessage.RxHeader.StdId;
 
-    uint32_t index;
-    /* Search rxArray form CANmodule for the same CAN-ID. */
-    for (index = 0; index < CANmodule->rxSize; index++)
-    {
-			uint16_t msg = (((uint16_t)(CANmessage.RxHeader.StdId << 2)) | (uint16_t)(CANmessage.RxHeader.RTR));
-			if (((msg ^ MsgBuff->ident) & MsgBuff->mask) == 0)
-			{
-				msgMatched = true;
-				break;
-			}
-			MsgBuff++;
-    }
+  uint32_t index;
+  /* Search rxArray form CANmodule for the same CAN-ID. */
+	// 下面这个for循环来判断用什么函数来处理收到的消息，具体是SDO/PDO/NMT等就在这里判断。
+	// 也就意味着rxArray很重要，需要事先配置。
+  for (index = 0; index < CANmodule->rxSize; index++)
+  {
+		uint16_t msg = (((uint16_t)(CANmessage.RxHeader.StdId << 2)) | (uint16_t)(CANmessage.RxHeader.RTR));
+		if (((msg ^ MsgBuff->ident) & MsgBuff->mask) == 0)
+		{
+			msgMatched = true;
+			break;
+		}
+		MsgBuff++;
+  }
 
 	/* Call specific function, which will process the message */
 	if(msgMatched && (MsgBuff != NULL) && (MsgBuff->pFunct != NULL))
