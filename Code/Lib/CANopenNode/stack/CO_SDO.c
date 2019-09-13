@@ -275,7 +275,8 @@ static void CO_SDO_receive(void *object, const CO_CANrxMsg_t *msg)
  * For more information see file CO_SDO.h.
  */
 static CO_SDO_abortCode_t CO_ODF_1200(CO_ODF_arg_t *ODF_arg);
-static CO_SDO_abortCode_t CO_ODF_1200(CO_ODF_arg_t *ODF_arg){
+static CO_SDO_abortCode_t CO_ODF_1200(CO_ODF_arg_t *ODF_arg)
+{
     uint8_t *nodeId;
     uint32_t value;
     CO_SDO_abortCode_t ret = CO_SDO_AB_NONE;
@@ -284,7 +285,8 @@ static CO_SDO_abortCode_t CO_ODF_1200(CO_ODF_arg_t *ODF_arg){
     value = CO_getUint32(ODF_arg->data);
 
     /* if SDO reading Object dictionary 0x1200, add nodeId to the value */
-    if((ODF_arg->reading) && (ODF_arg->subIndex > 0U)){
+    if((ODF_arg->reading) && (ODF_arg->subIndex > 0U))
+		{
         CO_setUint32(ODF_arg->data, value + *nodeId);
     }
 
@@ -309,28 +311,31 @@ CO_ReturnError_t CO_SDO_init(
         uint16_t                CANdevTxIdx)
 {
     /* verify arguments */
-    if(SDO==NULL || CANdevRx==NULL || CANdevTx==NULL){
+    if(SDO==NULL || CANdevRx==NULL || CANdevTx==NULL)
+		{
         return CO_ERROR_ILLEGAL_ARGUMENT;
     }
-
+		
     /* configure own object dictionary */
-    if(parentSDO == NULL){
+    if(parentSDO == NULL)
+		{
         uint16_t i;
-
         SDO->ownOD = true;
         SDO->OD = OD;
         SDO->ODSize = ODSize;
         SDO->ODExtensions = ODExtensions;
 
         /* clear pointers in ODExtensions */
-        for(i=0U; i<ODSize; i++){
+        for(i=0U; i<ODSize; i++)
+				{
             SDO->ODExtensions[i].pODFunc = NULL;
             SDO->ODExtensions[i].object = NULL;
             SDO->ODExtensions[i].flags = NULL;
         }
     }
     /* copy object dictionary from parent */
-    else{
+    else
+		{
         SDO->ownOD = false;
         SDO->OD = parentSDO->OD;
         SDO->ODSize = parentSDO->ODSize;
@@ -345,11 +350,13 @@ CO_ReturnError_t CO_SDO_init(
 
 
     /* Configure Object dictionary entry at index 0x1200 */
-    if(ObjDictIndex_SDOServerParameter == OD_H1200_SDO_SERVER_PARAM){
+    if(ObjDictIndex_SDOServerParameter == OD_H1200_SDO_SERVER_PARAM)
+		{
         CO_OD_configure(SDO, ObjDictIndex_SDOServerParameter, CO_ODF_1200, (void*)&SDO->nodeId, 0U, 0U);
     }
 
-    if((COB_IDClientToServer & 0x80000000) != 0 || (COB_IDServerToClient & 0x80000000) != 0 ){
+    if((COB_IDClientToServer & 0x80000000) != 0 || (COB_IDServerToClient & 0x80000000) != 0 )
+		{
         // SDO is invalid
         COB_IDClientToServer = 0;
         COB_IDServerToClient = 0;

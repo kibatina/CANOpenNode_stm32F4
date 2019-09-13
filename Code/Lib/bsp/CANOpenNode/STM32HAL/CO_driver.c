@@ -320,43 +320,44 @@ CO_ReturnError_t CO_CANrxBufferInit(
 {
     CO_ReturnError_t ret = CO_ERROR_NO;
 
-    if((CANmodule!=NULL) && (object!=NULL) && (pFunct!=NULL) && (index < CANmodule->rxSize)){
-        /* buffer, which will be configured */
-        CO_CANrx_t *buffer = &CANmodule->rxArray[index];
+    if((CANmodule!=NULL) && (object!=NULL) && (pFunct!=NULL) && (index < CANmodule->rxSize))
+		{
+      /* buffer, which will be configured */
+      CO_CANrx_t *buffer = &CANmodule->rxArray[index];
 
-        /* Configure object variables */
-        buffer->object = object;
-        buffer->pFunct = pFunct;
+      /* Configure object variables */
+      buffer->object = object;		// 配置目标
+      buffer->pFunct = pFunct;		// 配置函数
+      /* CAN identifier and CAN mask, bit aligned with CAN module. Different on different microcontrollers. */
+			// 左移两位的原因？ TODO
+      buffer->ident = (ident & 0x07FF) << 2;
+      if (rtr)
+      {
+      	buffer->ident |= 0x02;
+      }
+      buffer->mask = (mask & 0x07FF) << 2;
+      buffer->mask |= 0x02;
 
-        /* CAN identifier and CAN mask, bit aligned with CAN module. Different on different microcontrollers. */
-        buffer->ident = (ident & 0x07FF) << 2;
-        if (rtr)
-        {
-        	buffer->ident |= 0x02;
-        }
-        buffer->mask = (mask & 0x07FF) << 2;
-        buffer->mask |= 0x02;
-
-        /* Set CAN hardware module filter and mask. */
-        if(CANmodule->useCANrxFilters)
-        	{
-            /* TODO Configure CAN module hardware filters */
-        	}
-        else
-        	{
+      /* Set CAN hardware module filter and mask. */
+      if(CANmodule->useCANrxFilters)
+      {
+          /* TODO Configure CAN module hardware filters */
+      }
+      else
+      {
         	/*no hardware filters*/
-        		CAN_FilterTypeDef FilterConfig;
-
-        		FilterConfig.FilterBank = 0;
-        		FilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
-        		FilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
-        		FilterConfig.FilterIdHigh = 0x0;
-        		FilterConfig.FilterIdLow = 0x0;
-        		FilterConfig.FilterMaskIdHigh = 0x0;
-        		FilterConfig.FilterMaskIdLow = 0x0;
-        		FilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
-        		FilterConfig.FilterActivation = ENABLE;
-        		FilterConfig.SlaveStartFilterBank = 14;
+      	CAN_FilterTypeDef FilterConfig;
+				// TODO,filter只在这里配置。看起来没有去使用filter功能。
+        FilterConfig.FilterBank = 0;
+        FilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+        FilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+        FilterConfig.FilterIdHigh = 0x0;
+        FilterConfig.FilterIdLow = 0x0;
+        FilterConfig.FilterMaskIdHigh = 0x0;
+        FilterConfig.FilterMaskIdLow = 0x0;
+        FilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
+        FilterConfig.FilterActivation = ENABLE;
+        FilterConfig.SlaveStartFilterBank = 14;
 
 				if(HAL_CAN_ConfigFilter(CANmodule->CANbaseAddress, &FilterConfig)!=HAL_OK)
 				{
@@ -366,8 +367,8 @@ CO_ReturnError_t CO_CANrxBufferInit(
 				{
 					;//do nothing
 				}
-        	}
-        }
+     }
+   	}
     else
     {
         ret = CO_ERROR_ILLEGAL_ARGUMENT;
