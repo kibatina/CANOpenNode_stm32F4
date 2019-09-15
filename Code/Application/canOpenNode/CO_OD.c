@@ -135,16 +135,25 @@ struct sCO_OD_EEPROM CO_OD_EEPROM = {
            {(void*)&CO_OD_ROM.identity.productCode, 0x85,  4},
            {(void*)&CO_OD_ROM.identity.revisionNumber, 0x85,  4},
            {(void*)&CO_OD_ROM.identity.serialNumber, 0x85,  4}};
-/*0x1200*/ const CO_OD_entryRecord_t OD_record1200[3] = {
+/*0x1200*/
+// T_SDO, R_SDO, cob_id =600+nodid, 580+nodeid.				
+//05= readable + rom。 85= multibyte + readable +rom.
+/*1200*///{{0x2, 0x600L, 0x580L}},
+//当sdo数据的时候，master是client，slave是server。
+const CO_OD_entryRecord_t OD_record1200[3] = {
            {(void*)&CO_OD_ROM.SDOServerParameter[0].maxSubIndex, 0x05,  1},
            {(void*)&CO_OD_ROM.SDOServerParameter[0].COB_IDClientToServer, 0x85,  4},
            {(void*)&CO_OD_ROM.SDOServerParameter[0].COB_IDServerToClient, 0x85,  4}};
-/*0x1280*/ const CO_OD_entryRecord_t OD_record1280[4] = {
+/*0x1280*/
+// SDO client parameters
+/*1280*///{{0x3, 0x0L, 0x0L, 0x0}},					 
+const CO_OD_entryRecord_t OD_record1280[4] = {
            {(void*)&CO_OD_RAM.SDOClientParameter[0].maxSubIndex, 0x06,  1},
            {(void*)&CO_OD_RAM.SDOClientParameter[0].COB_IDClientToServer, 0xBE,  4},
            {(void*)&CO_OD_RAM.SDOClientParameter[0].COB_IDServerToClient, 0xBE,  4},
            {(void*)&CO_OD_RAM.SDOClientParameter[0].nodeIDOfTheSDOServer, 0x0E,  1}};
-/*0x1400*/ const CO_OD_entryRecord_t OD_record1400[3] = {
+/*0x1400*/ 
+const CO_OD_entryRecord_t OD_record1400[3] = {
            {(void*)&CO_OD_ROM.RPDOCommunicationParameter[0].maxSubIndex, 0x05,  1},
            {(void*)&CO_OD_ROM.RPDOCommunicationParameter[0].COB_IDUsedByRPDO, 0x8D,  4},
            {(void*)&CO_OD_ROM.RPDOCommunicationParameter[0].transmissionType, 0x0D,  1}};
