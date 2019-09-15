@@ -284,6 +284,15 @@ struct sCO_OD_EEPROM CO_OD_EEPROM = {
 /*******************************************************************************
    OBJECT DICTIONARY
 *******************************************************************************/
+//0X85 = multi byte + readable + rom.
+//0x36 = rpdo mapable + tpdo mapable + readable + ram
+//0Xb6 = multi byte + tpdo + rpdo + readable + ram
+//0X8E = multi byte + writeable + readable + ram
+//0x8d = multi byte + writeable + readable + rom
+//0x05 = readable + rom 
+//0x0d = writeable + readable + rom
+//0X87 = multibyte + readable + eeprom
+//0x00 = record,record的attribute在record里面。
 // 字典在这里。
 const CO_OD_entry_t CO_OD[CO_OD_NoOfElements] = {
 {0x1000, 0x00, 0x85,  4, (void*)&CO_OD_ROM.deviceType},
