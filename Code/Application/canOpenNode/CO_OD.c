@@ -154,7 +154,7 @@ const CO_OD_entryRecord_t OD_record1280[4] = {
            {(void*)&CO_OD_RAM.SDOClientParameter[0].COB_IDServerToClient, 0xBE,  4},
            {(void*)&CO_OD_RAM.SDOClientParameter[0].nodeIDOfTheSDOServer, 0x0E,  1}};
 /*0x1400*/
-// RPDO1	
+// 1st RPDO communication parameters	
 //0x8d = multibyte + writeable + readalbe + rom
 //0x0d = writeable + readalbe + rom
 //{0x2, 0x200L, 0xFF}
